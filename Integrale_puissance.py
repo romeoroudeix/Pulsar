@@ -3,24 +3,30 @@ from scipy.integrate import quad, dblquad, tplquad
 import matplotlib.pyplot as plt
 from scipy import stats
 
-r_T = 3.09 * 10 ** 15 # B. Cerutti and G. Giacinti 2021
-gamma_T = 3*10**6 # Kennel and Coroniti
-q = 1.5
-p = 2
-R_cy = 9.46*10**15 * 6523 * 0.1 * 1 / 3600 * np.pi / 180
-    
-print(f"R_cy : {R_cy:e}")
-print(f"r_t : {r_T:e}")
 
-theta_obs = 24 * np.pi / 180
+# Constantes physiques : 
+q = 1.5  # arbitraire
+p = 2    # arbitraire
+gamma_T = 3*10**6  # Kennel and Coroniti
+theta_W = 10 * np.pi/180   # arbitraire  
+nu_caract = 10    # arbitraire
+
+
+# Constantes géométriques : 
+r_T = 3.09 * 10 ** 15  # B. Cerutti and G. Giacinti 2021
+R_cy = 9.46*10**15 * 6523 * 0.1 * 1 / 3600 * np.pi / 180   # Rayon du cylindre avec une résolution de 1"
+theta_obs = 24 * np.pi / 180  # Photo du pulsar
+
+# Constantes géométriques adimentionnés : 
+R_cy_ad = R_cy/r_T
+
         
-theta_W = 10 * np.pi/180       
 
 def u(alpha) : 
     N = np.sqrt(1 + np.tan(alpha)**2 + np.tan(theta_obs)**2)
     return 1/N, np.tan(alpha)/N, np.tan(theta_obs)/N
 
-def integrand(r, theta, phi, nu, alpha):
+def integrand(r, theta, phi, nu, alpha):   
     gamma = gamma_T*(r/r_T)**q
     beta = np.sqrt(1-1/gamma**2)
     x,y,z = u(alpha)
@@ -28,13 +34,13 @@ def integrand(r, theta, phi, nu, alpha):
 
     return nu**((1-p)/2)*(1/(gamma*(1-beta*cos_theta_d)))**((5+p)/2)*r**2*np.sin(theta)
 
+
 def condition_c(r, theta, phi, d_cy, alpha):
     x_M = r*np.sin(theta)*np.cos(phi)
     y_M = r*np.sin(theta)*np.sin(phi)
     z_M = r*np.cos(theta)
     x,y,z = u(alpha)
 
-    return (x_M - d_cy)**2 + y_M**2 + z_M**2 - (x*(x_M-d_cy) + y*y_M + z*z_M)**2 <= R_cy**2
 
 def integrate_over_volume(r_T, theta_W, nu, d_cy, alpha):
 
@@ -122,6 +128,9 @@ def Puissance_recue(nu, alpha, d_cy, nb_points):
     plt.suptitle("Puissance reçue en fixant 2 paramètres sur 3")
     plt.tight_layout()
     plt.show()
+
+
+
 
 Puissance_recue(1, 0, r_T/10, 10)
 
